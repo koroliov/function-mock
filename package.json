@@ -2,9 +2,9 @@
   "name": "mock-function",
   "version": "0.0.0",
   "description": "Create a function wich will return values based on arguments it's received",
-  "main": "index.js",
+  "main": "src/mock-function.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape test/**.test.js"
   },
   "keywords": [
     "mock",
