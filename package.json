@@ -14,5 +14,8 @@
   "license": "MIT",
   "devDependencies": {
     "tape": "^5.2.0"
+  },
+  "dependencies": {
+    "deep-equal": "^2.0.5"
   }
 }
