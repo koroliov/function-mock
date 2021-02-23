@@ -5,7 +5,7 @@ tests.
 
 Instead of writing:
 
-    function mockFunction(val) {
+    function functionMock(val) {
       if (val === 'foo')
         return '1';
       }
@@ -16,8 +16,8 @@ Instead of writing:
 
 Which easily becomes too voluminous and cluttered, one should be able to write:
 
-    const mockFunction = require('mock-function');
-    const fn = mockFunction().with('foo').returns('1').with('bar').returns('2');
+    const functionMock = require('mock-function');
+    const fn = functionMock().with('foo').returns('1').with('bar').returns('2');
 
 I created this for this rather simple purpose, so this module hasn't been
 thoroughly tested etc. But the behavior I needed has been covered in the tests.
@@ -33,11 +33,11 @@ should be rather intuitive.
 
 Here, just a couple of examples:
 
-    const mockFunction = require('mock-function');
-    const mf = mockFunction()
+    const functionMock = require('mock-function');
+    const fm = functionMock()
       .with(1, 2, 3).returns('foo')
       .with([2, 1]).throws(new Error('Foo'));
 
-    mf([2, 1]);             // will throw new Error('Foo')
-    mf(1, 2, 3);            // will return 'foo'
-    mf(anyOtherOrUndef);    // will return undefined
+    fm([2, 1]);             // will throw new Error('Foo')
+    fm(1, 2, 3);            // will return 'foo'
+    fm(anyOtherOrUndef);    // will return undefined

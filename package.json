@@ -1,8 +1,8 @@
 {
-  "name": "mock-function",
+  "name": "function-mock",
   "version": "0.0.0",
   "description": "Create a function wich will return values based on arguments it's received",
-  "main": "src/mock-function.js",
+  "main": "src/function-mock.js",
   "scripts": {
     "test": "tape test/**.test.js"
   },
@@ -18,6 +18,6 @@
   "dependencies": {
     "deep-equal": "^2.0.5"
   },
-  "homepage": "https://github.com/koroliov/mock-function#readme",
-  "url" : "https://github.com/koroliov/mock-function/issues"
+  "homepage": "https://github.com/koroliov/function-mock#readme",
+  "url" : "https://github.com/koroliov/function-mock/issues"
 }

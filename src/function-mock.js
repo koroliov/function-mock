@@ -2,7 +2,7 @@
 
 const de = require('deep-equal');
 
-function mockFunction() {
+function functionMock() {
   const func = function func(...calledWith) {
     const respInd = func.withArgs.findIndex((args) => {
       return de(args, calledWith) ? true : false;
@@ -48,4 +48,4 @@ function mockFunction() {
   }
 }
 
-module.exports = mockFunction;
+module.exports = functionMock;
