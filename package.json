@@ -19,5 +19,11 @@
     "deep-equal": "^2.0.5"
   },
   "homepage": "https://github.com/koroliov/function-mock#readme",
-  "url" : "https://github.com/koroliov/function-mock/issues"
+  "url" : "https://github.com/koroliov/function-mock/issues",
+  "files": [
+    "src/function-mock.js"
+  ],
+  "repository": {
+    "repository": "github:koroliov/function-mock"
+  }
 }

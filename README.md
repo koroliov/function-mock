@@ -33,7 +33,7 @@ should be rather intuitive.
 
 Here, just a couple of examples:
 
-    const functionMock = require('mock-function');
+    const functionMock = require('function-mock');
     const fm = functionMock()
       .with(1, 2, 3).returns('foo')
       .with([2, 1]).throws(new Error('Foo'));
