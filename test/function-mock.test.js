@@ -20,7 +20,7 @@ tp(`it returns the provided value on specific args,
   t.end();
 });
 
-tp.skip(`supports chaining in any order, returns undefined if the arguments don't
+tp(`supports chaining in any order, returns undefined if the arguments don't
   match`, t => {
   let mf = functionMock().with().returns(1).with('foo').returns(2);
   t.equal(mf('foo'), 2);
