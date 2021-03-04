@@ -4,15 +4,29 @@ const de = require('deep-equal');
 
 function functionMock() {
   const func = function func(...calledWith) {
-    const respInd = func.withArgs.findIndex((args) => {
-      return de(args, calledWith) ? true : false;
-    });
-    if (func.responses[respInd]) {
-      const resp = func.responses[respInd];
-      if (resp.isThrow) {
-        throw func.responses[respInd].value;
-      } else {
-        return func.responses[respInd].value;
+    if (isCalledWithNew(this)) {
+      const respInd = func.withArgs.findIndex(args => {
+        return args.withNew && de(args.value, calledWith) ? true : false;
+      });
+      if (func.responses[respInd]) {
+        const resp = func.responses[respInd];
+        if (resp.isThrow) {
+          throw resp.value;
+        } else {
+          return resp.value;
+        }
+      }
+    } else {
+      const respInd = func.withArgs.findIndex(args => {
+        return !args.withNew && de(args.value, calledWith) ? true : false;
+      });
+      if (func.responses[respInd]) {
+        const resp = func.responses[respInd];
+        if (resp.isThrow) {
+          throw resp.value;
+        } else {
+          return resp.value;
+        }
       }
     }
   };
@@ -20,14 +34,23 @@ function functionMock() {
   func.responses = [];
 
   func.with = withFunc;
+  func.withNew = withNewFunc;
   func.returns = returnsFunc;
   func.throws = throwsFunc;
 
   return func;
 
   function withFunc(...args) {
-    func.withArgs.push(args);
+    func.withArgs.push({value: args, withNew: false});
     delete func.with;
+    func.returns = returnsFunc;
+    func.throws = throwsFunc;
+    return func;
+  }
+  function withNewFunc(...args) {
+    func.withArgs.push({value: args, withNew: true});
+    delete func.with;
+    delete func.withNew;
     func.returns = returnsFunc;
     func.throws = throwsFunc;
     return func;
@@ -37,6 +60,7 @@ function functionMock() {
     delete func.returns;
     delete func.throws;
     func.with = withFunc;
+    func.withNew = withNewFunc;
     return func;
   }
   function throwsFunc(value) {
@@ -44,7 +68,11 @@ function functionMock() {
     delete func.throws;
     delete func.returns;
     func.with = withFunc;
+    func.withNew = withNewFunc;
     return func;
+  }
+  function isCalledWithNew(callerThis) {
+    return callerThis instanceof func;
   }
 }
 

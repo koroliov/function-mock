@@ -88,3 +88,63 @@ tp(`doesn't confuse similar args`, t => {
 
   t.end();
 });
+
+tp(`it returns the provided object value on specific args,
+  if it's been called with new, and doesn't return this value, if called
+  with the same args but without new`, t => {
+  const mockInstance = {};
+  let mf = functionMock()
+    .withNew().returns(mockInstance)
+    .with().returns(1);
+  t.equal(new mf(), mockInstance);
+  t.equal(mf(), 1);
+
+  mf = functionMock()
+    .withNew('foo').returns(mockInstance)
+    .with('foo').returns(1);
+  t.equal(new mf('foo'), mockInstance);
+  t.equal(mf('foo'), 1);
+
+  mf = functionMock().withNew(['foo']).returns(mockInstance);
+  t.equal(new mf(['foo']), mockInstance);
+  t.equal(mf(['foo']), undefined);
+
+  t.end();
+});
+
+tp(`it throws the provided value on specific args,
+  if it's been called with new, and doesn't throw this value, if called
+  with the same args but without new`, t => {
+  const error = new Error('Foo');
+  let mf = functionMock()
+    .withNew().throws(error)
+    .with().returns(1);
+  t.throws(() => {
+    new mf();
+  }, /Foo/);
+  t.doesNotThrow(() => {
+    mf();
+  });
+
+  mf = functionMock()
+    .withNew('foo').throws(error)
+    .with('foo').returns(1);
+  t.throws(() => {
+    new mf('foo');
+  }, /Foo/);
+  t.doesNotThrow(() => {
+    mf('foo');
+  });
+
+  mf = functionMock()
+    .withNew(['foo']).throws(error)
+    .with(['foo']).returns(1);
+  t.throws(() => {
+    new mf(['foo']);
+  }, /Foo/);
+  t.doesNotThrow(() => {
+    mf(['foo']);
+  });
+
+  t.end();
+});

@@ -41,3 +41,16 @@ Here, just a couple of examples:
     fm([2, 1]);             // will throw new Error('Foo')
     fm(1, 2, 3);            // will return 'foo'
     fm(anyOtherOrUndef);    // will return undefined
+
+When the mock function is supposed to be called with the new operator, the user
+must provide the return value to be some kind of object, i.e. an object, array
+or something like that, not a primitive.  Since it's required by the ECMA
+script spec. `return aPrimitive` will not work in a function called with `new`,
+such a call will return its `this` value insted
+
+    const functionMock = require('function-mock');
+    const someObjectValue = [];
+    const fm = functionMock()
+      .withNew(1, 2, 3).returns(someObjectValue)
+
+    new fm(1, 2, 3);            // will return someObjectValue
