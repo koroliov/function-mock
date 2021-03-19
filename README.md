@@ -1,4 +1,4 @@
-# mock-function
+# function-mock
 
 The original intention of this module is to simplify mock functions in unit
 tests.
