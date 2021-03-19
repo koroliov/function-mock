@@ -112,6 +112,15 @@ tp(`it returns the provided object value on specific args,
   t.end();
 });
 
+tp(`it returns date instances with new`, t => {
+  const dateInstance = new Date(75, 0);
+  let mf = functionMock()
+    .withNew().returns(dateInstance);
+  let expDate = new mf();
+  t.equal(expDate.getYear(), 75);
+  t.end();
+});
+
 tp(`it throws the provided value on specific args,
   if it's been called with new, and doesn't throw this value, if called
   with the same args but without new`, t => {
