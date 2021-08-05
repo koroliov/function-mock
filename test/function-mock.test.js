@@ -3,7 +3,7 @@
 const tp = require('tape');
 const functionMock = require('../src/function-mock.js');
 
-tp(`it returns the provided value on specific args,
+tp(`it returns the provided value on specific args (various data types),
   returns undefined if the arguments don't match`, t => {
   let mf = functionMock().with().returns(1);
   t.equal(mf(), 1);
@@ -16,6 +16,10 @@ tp(`it returns the provided value on specific args,
   mf = functionMock().with(['foo']).returns(1);
   t.equal(mf(['foo']), 1);
   t.equal(mf(['bar']), undefined);
+
+  mf = functionMock().with({foo: 123}).returns(1);
+  t.equal(mf({foo: 123}), 1);
+  t.equal(mf({foo: 124}), undefined);
 
   t.end();
 });
