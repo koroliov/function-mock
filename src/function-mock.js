@@ -10,8 +10,8 @@ function functionMock() {
       return processWithCall(calledWith);
     }
   };
-  func.withArgs = [];
-  func.responses = [];
+  const withArgs = [];
+  const responses = [];
 
   func.with = withFunc;
   func.withNew = withNewFunc;
@@ -21,12 +21,12 @@ function functionMock() {
   return func;
 
   function processWithCall(calledWith) {
-    const respInd = func.withArgs.findIndex(args => {
+    const respInd = withArgs.findIndex(args => {
       return !args.withNew &&
         de(args.value, calledWith, {strict: true}) ? true : false;
     });
-    if (func.responses[respInd]) {
-      const resp = func.responses[respInd];
+    if (responses[respInd]) {
+      const resp = responses[respInd];
       if (resp.isThrow) {
         throw resp.value;
       } else {
@@ -36,11 +36,11 @@ function functionMock() {
   }
 
   function processWithNewCall(calledWith) {
-    const respInd = func.withArgs.findIndex(args => {
+    const respInd = withArgs.findIndex(args => {
       return args.withNew && de(args.value, calledWith) ? true : false;
     });
-    if (func.responses[respInd]) {
-      const resp = func.responses[respInd];
+    if (responses[respInd]) {
+      const resp = responses[respInd];
       if (resp.isThrow) {
         throw resp.value;
       } else {
@@ -50,14 +50,14 @@ function functionMock() {
   }
 
   function withFunc(...args) {
-    func.withArgs.push({value: args, withNew: false});
+    withArgs.push({value: args, withNew: false});
     delete func.with;
     func.returns = returnsFunc;
     func.throws = throwsFunc;
     return func;
   }
   function withNewFunc(...args) {
-    func.withArgs.push({value: args, withNew: true});
+    withArgs.push({value: args, withNew: true});
     delete func.with;
     delete func.withNew;
     func.returns = returnsFunc;
@@ -65,7 +65,7 @@ function functionMock() {
     return func;
   }
   function returnsFunc(value) {
-    func.responses.push({value, isThrow: false});
+    responses.push({value, isThrow: false});
     delete func.returns;
     delete func.throws;
     func.with = withFunc;
@@ -73,7 +73,7 @@ function functionMock() {
     return func;
   }
   function throwsFunc(value) {
-    func.responses.push({value, isThrow: true});
+    responses.push({value, isThrow: true});
     delete func.throws;
     delete func.returns;
     func.with = withFunc;
