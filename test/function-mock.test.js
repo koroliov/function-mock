@@ -13,6 +13,10 @@ tp(`it returns the provided value on specific args (various data types),
   t.equal(mf('foo'), 1);
   t.equal(mf('bar'), undefined);
 
+  mf = functionMock().with(undefined).returns(1);
+  t.equal(mf(undefined), 1);
+  t.equal(mf(null), undefined);
+
   mf = functionMock().with(['foo']).returns(1);
   t.equal(mf(['foo']), 1);
   t.equal(mf(['bar']), undefined);
@@ -158,6 +162,21 @@ tp(`it throws the provided value on specific args,
   t.doesNotThrow(() => {
     mf(['foo']);
   });
+
+  t.end();
+});
+
+tp(`it matches primitive values as === and object values as ==`, t => {
+  const objRetVal = {};
+  let mf = functionMock().with([1]).returns(1)
+  .withNew([1]).returns(objRetVal)
+  .withNew(1).returns(objRetVal);
+
+  t.equal(mf([1]), 1);
+  t.equal(mf(['1']), undefined);
+
+  t.equal(new mf(1), objRetVal);
+  t.deepLooseEqual(new mf('1'), {});
 
   t.end();
 });

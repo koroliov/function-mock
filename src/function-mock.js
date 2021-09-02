@@ -18,7 +18,8 @@ function functionMock() {
       }
     } else {
       const respInd = func.withArgs.findIndex(args => {
-        return !args.withNew && de(args.value, calledWith) ? true : false;
+        return !args.withNew &&
+          de(args.value, calledWith, {strict: true}) ? true : false;
       });
       if (func.responses[respInd]) {
         const resp = func.responses[respInd];
