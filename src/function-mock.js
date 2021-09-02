@@ -5,30 +5,9 @@ const de = require('deep-equal');
 function functionMock() {
   const func = function func(...calledWith) {
     if (isCalledWithNew(this)) {
-      const respInd = func.withArgs.findIndex(args => {
-        return args.withNew && de(args.value, calledWith) ? true : false;
-      });
-      if (func.responses[respInd]) {
-        const resp = func.responses[respInd];
-        if (resp.isThrow) {
-          throw resp.value;
-        } else {
-          return resp.value;
-        }
-      }
+      return processWithNewCall(calledWith);
     } else {
-      const respInd = func.withArgs.findIndex(args => {
-        return !args.withNew &&
-          de(args.value, calledWith, {strict: true}) ? true : false;
-      });
-      if (func.responses[respInd]) {
-        const resp = func.responses[respInd];
-        if (resp.isThrow) {
-          throw resp.value;
-        } else {
-          return resp.value;
-        }
-      }
+      return processWithCall(calledWith);
     }
   };
   func.withArgs = [];
@@ -40,6 +19,35 @@ function functionMock() {
   func.throws = throwsFunc;
 
   return func;
+
+  function processWithCall(calledWith) {
+    const respInd = func.withArgs.findIndex(args => {
+      return !args.withNew &&
+        de(args.value, calledWith, {strict: true}) ? true : false;
+    });
+    if (func.responses[respInd]) {
+      const resp = func.responses[respInd];
+      if (resp.isThrow) {
+        throw resp.value;
+      } else {
+        return resp.value;
+      }
+    }
+  }
+
+  function processWithNewCall(calledWith) {
+    const respInd = func.withArgs.findIndex(args => {
+      return args.withNew && de(args.value, calledWith) ? true : false;
+    });
+    if (func.responses[respInd]) {
+      const resp = func.responses[respInd];
+      if (resp.isThrow) {
+        throw resp.value;
+      } else {
+        return resp.value;
+      }
+    }
+  }
 
   function withFunc(...args) {
     func.withArgs.push({value: args, withNew: false});
