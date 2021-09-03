@@ -35,7 +35,8 @@ function functionMock() {
 
   function processWithNewCall(calledWith) {
     const respInd = withArgs.findIndex(args => {
-      return args.withNew && de(args.value, calledWith) ? true : false;
+      return args.withNew &&
+        de(args.value, calledWith, {strict: true}) ? true : false;
     });
     if (responses[respInd]) {
       const resp = responses[respInd];
