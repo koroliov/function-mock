@@ -76,7 +76,7 @@ tp(`works with multiple arguments`, t => {
 });
 
 tp(`throws and returns word in chain`, t => {
-  let mf = functionMock().with(1, 2, 3).returns('foo').with(3, 2, 1)
+  const mf = functionMock().with(1, 2, 3).returns('foo').with(3, 2, 1)
     .throws(new Error('Foo'));
   t.equal(mf(1, 2, 3), 'foo');
   t.throws(() => {
@@ -87,7 +87,7 @@ tp(`throws and returns word in chain`, t => {
 });
 
 tp(`doesn't confuse similar args`, t => {
-  let mf = functionMock().with(1, 2, 3).returns('foo').with(1, 2)
+  const mf = functionMock().with(1, 2, 3).returns('foo').with(1, 2)
     .throws(new Error('Foo'));
   t.equal(mf(1, 2, 3), 'foo');
   t.throws(() => {
@@ -122,9 +122,9 @@ tp(`it returns the provided object value on specific args,
 
 tp(`it returns date instances with new`, t => {
   const dateInstance = new Date(75, 0);
-  let mf = functionMock()
+  const mf = functionMock()
     .withNew().returns(dateInstance);
-  let expDate = new mf();
+  const expDate = new mf();
   t.equal(expDate.getYear(), 75);
   t.end();
 });
@@ -168,7 +168,7 @@ tp(`it throws the provided value on specific args,
 
 tp(`it matches primitive values as === and object values as ==`, t => {
   const objRetVal = {};
-  let mf = functionMock().with([1]).returns(1)
+  const mf = functionMock().with([1]).returns(1)
   .withNew([1]).returns(objRetVal)
   .withNew(1).returns(objRetVal);
 
