@@ -15,8 +15,6 @@ function functionMock() {
 
   func.with = withFunc;
   func.withNew = withNewFunc;
-  func.returns = returnsFunc;
-  func.throws = throwsFunc;
 
   return func;
 
