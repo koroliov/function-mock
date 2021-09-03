@@ -130,7 +130,8 @@ For instance:
         constructor() {}
       }
 
-      //new A() will produce a {} but it won't match {} which is an instance of A
+      //new A() will virtually produce a {} (an empty object w/o any own
+      //properties) but it won't match a litteral {}
       const fm = functionMock().with(new A()).returns('match');
       //doesn't match
       fm({});
