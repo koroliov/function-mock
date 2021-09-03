@@ -40,16 +40,15 @@ similar method call: `.with(…).returns(…)`. Makes the mocked function return
 provided value if the arguments to its call match, (if called after
 `.withNew()` then the value must be an object (not a primitive)):
 
+      const functionMock = require('function-mock');
+      const mocked = functionMock().with(1).returns(2);
+      //returns 2
+      mocked(1);
 
-    const functionMock = require('function-mock');
-    const mocked = functionMock().with(1).returns(2);
-    //returns 2
-    mocked(1);
-
-    const notPrimitive = [];
-    mocked.withNew(1).returns(notPrimitive);
-    //returns notPrimitive
-    new mocked(1);
+      const notPrimitive = [];
+      mocked.withNew(1).returns(notPrimitive);
+      //returns notPrimitive
+      new mocked(1);
 
 - `.throws(value)` analogous to `.returns()` but throws the value. May be any
 value, not only a reference one, but generally should be an instance of `Error`
@@ -61,13 +60,12 @@ value, not only a reference one, but generally should be an instance of `Error`
   - the mock function returns `undefined` if it's called with arguments which
 haven't matched arguments from any previous `.with()` call:
 
+        const mocked = functionMock()
+          .with(1).returns(2)
+          .with(1, 2).returns(3);
 
-    const mocked = functionMock()
-      .with(1).returns(2)
-      .with(1, 2).returns(3);
-
-    //returns undefined
-    mocked(2, 1);
+        //returns undefined
+        mocked(2, 1);
 
 - with the `new` operator:
 
@@ -75,14 +73,14 @@ haven't matched arguments from any previous `.with()` call:
 haven't matched arguments from any previous `.with()` call:
 
 
-    const retValueOne = [];
-    const retValueTwo = {};
-    const mocked = functionMock()
-      .withNew(1).returns(retValueOne)
-      .withNew(1, 2).returns(retValueTwo);
+        const retValueOne = [];
+        const retValueTwo = {};
+        const mocked = functionMock()
+          .withNew(1).returns(retValueOne)
+          .withNew(1, 2).returns(retValueTwo);
 
-    //returns {}
-    new mocked(2, 1);
+        //returns {}
+        new mocked(2, 1);
 
 #### Arguments match rules
 For all methods (`.with()` & `.withNew()`) the arguments matching rules are the
@@ -105,39 +103,39 @@ For instance:
 - the argument order matters:
 
 
-    const fm = functionMock().with(1, 2).returns(3);
-    //doesn't match, doesn't return 3
-    fm(2, 1);
+      const fm = functionMock().with(1, 2).returns(3);
+      //doesn't match, doesn't return 3
+      fm(2, 1);
 
 - the amount of arguments matters:
 
 
-    const fm = functionMock().with(1).returns(3);
-    //doesn't match, doesn't return 3
-    fm(1, 2);
+      const fm = functionMock().with(1).returns(3);
+      //doesn't match, doesn't return 3
+      fm(1, 2);
 
 - primitive values are compared strictly `===`
 
 - reference values are compared deeply by their leaf nodes:
 
 
-    const fm = functionMock().with([{foo: 'foo'}], 'bar').returns('match');
-    //matches, returns 'match'
-    fm([{foo: 'foo',}], 'bar');
+      const fm = functionMock().with([{foo: 'foo'}], 'bar').returns('match');
+      //matches, returns 'match'
+      fm([{foo: 'foo',}], 'bar');
 
 - prototypes are counted, for instance:
 
 
-    class A {
-      constructor() {}
-    }
+      class A {
+        constructor() {}
+      }
 
-    //new A() will produce a {} but it won't match {} which is an instance of A
-    const fm = functionMock().with(new A()).returns('match');
-    //doesn't match
-    fm({});
-    //matches, returns 'match'
-    fm(new A());
+      //new A() will produce a {} but it won't match {} which is an instance of A
+      const fm = functionMock().with(new A()).returns('match');
+      //doesn't match
+      fm({});
+      //matches, returns 'match'
+      fm(new A());
 
 ### LICENSE
 
