@@ -180,3 +180,18 @@ tp(`it matches primitive values as === and object values as ==`, t => {
 
   t.end();
 });
+
+tp(`it matches prototypes`, t => {
+  class A {
+    constructor() {
+    }
+  }
+
+  const mf = functionMock().with(new A()).returns(1);
+
+  t.deepLooseEqual({}, new A());
+  t.equal(mf(new A()), 1);
+  t.equal(mf({}), undefined);
+
+  t.end();
+});
