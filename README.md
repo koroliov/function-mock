@@ -4,6 +4,11 @@
 
 The intention of this module is to simplify mock functions in unit tests.
 
+Sometimes it's not required or even detrimental to use tools, which allow calls
+counting, arguments recording etc. If you don't need all that functionality you
+may use an approach similar to this one: just define a behavior for a function,
+when it's called with particular arguments.
+
     const functionMock = require('function-mock');
     const fm = functionMock().with('foo').returns('1').with('bar').returns('2');
     //returns '1'
@@ -11,7 +16,7 @@ The intention of this module is to simplify mock functions in unit tests.
     //returns '2'
     fm('bar');
 
-### Documentation v1.0.0
+### Documentation v1.0.*
 
 The imported module is a function, which when called returns a mock function.
 On itself it's not much useful.
