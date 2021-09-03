@@ -1,56 +1,144 @@
 # function-mock
 
-The original intention of this module is to simplify mock functions in unit
-tests.
+### Intro
 
-Instead of writing:
+The intention of this module is to simplify mock functions in unit tests.
 
-    function functionMock(val) {
-      if (val === 'foo')
-        return '1';
-      }
-      if (val === 'bar')
-        return '2';
-      }
+    const functionMock = require('function-mock');
+    const fm = functionMock().with('foo').returns('1').with('bar').returns('2');
+    //returns '1'
+    fm('foo');
+    //returns '2'
+    fm('bar');
+
+### Documentation v1.0.0
+
+The imported module is a function, which when called returns a mock function.
+On itself it's not much useful.
+
+    const functionMock = require('function-mock');
+    const mocked = functionMock();
+
+    //returns undefined
+    mocked();
+
+#### `mocked` function's methods
+
+This function has several methods:
+
+- `.with(arg1?, arg2? …)`
+  - accepts arguments which later will be matched against arguments provided to
+  the `mocked(arg1?, arg2? …)` calls.
+
+- `.withNew(arg1?, arg2? …)`
+  - the same as the `.with()` method, except that arguments will be matched only
+  if the `mocked` function is called with the `new` operator:
+  `new mocked(arg1?, arg2 …)`
+
+- `.returns(value)` this method is intended to be called after a `.with()` or
+similar method call: `.with(…).returns(…)`. Makes the mocked function return the
+provided value if the arguments to its call match, (if called after
+`.withNew()` then the value must be an object (not a primitive)):
+
+
+    const functionMock = require('function-mock');
+    const mocked = functionMock().with(1).returns(2);
+    //returns 2
+    mocked(1);
+
+    const notPrimitive = [];
+    mocked.withNew(1).returns(notPrimitive);
+    //returns notPrimitive
+    new mocked(1);
+
+- `.throws(value)` analogous to `.returns()` but throws the value. May be any
+value, not only a reference one, but generally should be an instance of `Error`
+
+#### Call behavior with unmatched arguments
+
+- without the `new` operator:
+
+  - the mock function returns `undefined` if it's called with arguments which
+haven't matched arguments from any previous `.with()` call:
+
+
+    const mocked = functionMock()
+      .with(1).returns(2)
+      .with(1, 2).returns(3);
+
+    //returns undefined
+    mocked(2, 1);
+
+- with the `new` operator:
+
+  - the mock function returns `undefined` if it's called with arguments which
+haven't matched arguments from any previous `.with()` call:
+
+
+    const retValueOne = [];
+    const retValueTwo = {};
+    const mocked = functionMock()
+      .withNew(1).returns(retValueOne)
+      .withNew(1, 2).returns(retValueTwo);
+
+    //returns {}
+    new mocked(2, 1);
+
+#### Arguments match rules
+For all methods (`.with()` & `.withNew()`) the arguments matching rules are the
+same (the only difference is that if a mocked function was called with or
+without the `new` operator) its arguments won't ever match arguments provided
+to the `.withNew()` / `.with()` methods respectively.
+
+For instance:
+
+    const mocked = functionMock().with(1).returns(2);
+    //doesn't match, doesn't return 2
+    new mocked(1);
+
+    mocked.withNew(2).returns({});
+    //doesn't match, doesn't return {}
+    mocked(2);
+
+
+
+- the argument order matters:
+
+
+    const fm = functionMock().with(1, 2).returns(3);
+    //doesn't match, doesn't return 3
+    fm(2, 1);
+
+- the amount of arguments matters:
+
+
+    const fm = functionMock().with(1).returns(3);
+    //doesn't match, doesn't return 3
+    fm(1, 2);
+
+- primitive values are compared strictly `===`
+
+- reference values are compared deeply by their leaf nodes:
+
+
+    const fm = functionMock().with([{foo: 'foo'}], 'bar').returns('match');
+    //matches, returns 'match'
+    fm([{foo: 'foo',}], 'bar');
+
+- prototypes are counted, for instance:
+
+
+    class A {
+      constructor() {}
     }
 
-Which easily becomes too voluminous and cluttered, one should be able to write:
+    //new A() will produce a {} but it won't match {} which is an instance of A
+    const fm = functionMock().with(new A()).returns('match');
+    //doesn't match
+    fm({});
+    //matches, returns 'match'
+    fm(new A());
 
-    const functionMock = require('mock-function');
-    const fn = functionMock().with('foo').returns('1').with('bar').returns('2');
+### LICENSE
 
-I created this for this rather simple purpose, so this module hasn't been
-thoroughly tested etc. But the behavior I needed has been covered in the tests.
-
-### Usage/Examples
-
-`require('mock-function');` returns a function, which is supposed to be called
-as a function, not a constructor. It returns another function, which allows its
-return values to be set up thru `.with()` and `returns()`/`throws()` calls.
-
-For behavior details see the tests in the test directory, though the behavior
-should be rather intuitive.
-
-Here, just a couple of examples:
-
-    const functionMock = require('function-mock');
-    const fm = functionMock()
-      .with(1, 2, 3).returns('foo')
-      .with([2, 1]).throws(new Error('Foo'));
-
-    fm([2, 1]);             // will throw new Error('Foo')
-    fm(1, 2, 3);            // will return 'foo'
-    fm(anyOtherOrUndef);    // will return undefined
-
-When the mock function is supposed to be called with the new operator, the user
-must provide the return value to be some kind of object, i.e. an object, array
-or something like that, not a primitive.  Since it's required by the ECMA
-script spec. `return aPrimitive` will not work in a function called with `new`,
-such a call will return its `this` value insted
-
-    const functionMock = require('function-mock');
-    const someObjectValue = [];
-    const fm = functionMock()
-      .withNew(1, 2, 3).returns(someObjectValue)
-
-    new fm(1, 2, 3);            // will return someObjectValue
+MIT
