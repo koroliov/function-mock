@@ -10,13 +10,18 @@ may use an approach similar to this one: just define a behavior for a function,
 when it's called with particular arguments.
 
     const functionMock = require('function-mock');
-    const fm = functionMock().with('foo').returns('1').with('bar').returns('2');
+    const fm = functionMock()
+      .with('foo').returns('1')
+      .with('bar').returns('2')
+      .withOther().throws(new Error('Unexpected arguments received'));
     //returns '1'
     fm('foo');
     //returns '2'
     fm('bar');
+    //throws
+    fm('bar', true);
 
-### Documentation v1.0.*
+### Documentation v1.1.*
 
 The imported module is a function, which when called returns a mock function.
 On itself it's not much useful.
@@ -31,19 +36,55 @@ On itself it's not much useful.
 
 This function has several methods:
 
-- `.with(arg1?, arg2? …)`
-  - accepts arguments which later will be matched against arguments provided to
-  the `mocked(arg1?, arg2? …)` calls.
+- `.with(arg1?, arg2? …)` Accepts arguments which later will be matched against
+  arguments provided to the `mocked(arg1?, arg2? …)` calls.
 
-- `.withNew(arg1?, arg2? …)`
-  - the same as the `.with()` method, except that arguments will be matched only
-  if the `mocked` function is called with the `new` operator:
-  `new mocked(arg1?, arg2 …)`
+- `.withNew(arg1?, arg2? …)` The same as the `.with()` method, except that
+  arguments will be matched only if the `mocked` function is called with the
+  `new` operator: `new mocked(arg1?, arg2 …)`
 
-- `.returns(value)` this method is intended to be called after a `.with()` or
-similar method call: `.with(…).returns(…)`. Makes the mocked function return the
-provided value if the arguments to its call match, (if called after
-`.withNew()` then the value must be an object (not a primitive)):
+- `.withOther()` Used to provide a return or throw value for ordinary calls
+  (without the new operator) where the arguments don't match any of the
+  arguments previously provided with the `.with()` or `.withNew()` calls the
+  `mocked(arg1?, arg2?  …)` calls.
+
+      const functionMock = require('function-mock');
+      let mocked = functionMock()
+        .with(1).returns(2)
+        .withOther().returns(0);
+      //returns 0
+      mocked('not mathing value');
+      //returns 0
+      mocked();
+
+      mocked = functionMock()
+        .with(1).returns(2)
+        .withOther().throws(0);
+      //throws 0
+      mocked();
+      //etc.
+
+  This method is supposed to be one of the last ones in the call chain. After
+  it's called only the `.withOtherNew()` method will be available on the value
+  returned from the `.returns()` or `.throws()` call.
+
+        const mocked = functionMock()
+          .with(1).returns(2)
+          .withOther().returns(0);
+          // this will throw, since no .with or .withNew methods available at
+          //this point
+          .with()
+          .returns(1);
+
+- `.withOtherNew()`
+  The same as the `.withOther()` method, except that will return/throw a value
+  provided to the subsequent `.returns()` or `.throws()` call only if the mock
+  function has been called with the `new` operator.
+
+- `.returns(value)` This method is intended to be called after a `.with()` or
+  similar method call: `.with(…).returns(…)`. Makes the mocked function return
+  the provided value if the arguments to its call match, (if called after
+  `.withNew()` then the value must be an object (not a primitive)):
 
       const functionMock = require('function-mock');
       const mocked = functionMock().with(1).returns(2);
@@ -60,32 +101,60 @@ value, not only a reference one, but generally should be an instance of `Error`
 
 #### Call behavior with unmatched arguments
 
-- without the `new` operator:
+- without the `new` operator, when the `.withOther()` method hasn't been called:
 
-  - the mock function returns `undefined` if it's called with arguments which
-haven't matched arguments from any previous `.with()` call:
+  the mock function returns `undefined` if it's called with arguments which
+  haven't matched arguments from any previous `.with()` call:
 
-        const mocked = functionMock()
-          .with(1).returns(2)
-          .with(1, 2).returns(3);
+      const mocked = functionMock()
+        .with(1).returns(2)
+        .with(1, 2).returns(3);
 
-        //returns undefined
-        mocked(2, 1);
+      //returns undefined
+      mocked(2, 1);
 
-- with the `new` operator:
+- without the `new` operator, when the `.withOther()` method has been called:
 
-  - the mock function returns `undefined` if it's called with arguments which
-haven't matched arguments from any previous `.with()` call:
+  the mock function returns/throws a value provided to the subsequent
+  `.returns()` / `.throws()` call:
 
+      const mocked = functionMock()
+        .with(1).returns(2)
+        .with(1, 2).returns(3)
+        .withOther().returns('foo');
 
-        const retValueOne = [];
-        const retValueTwo = {};
-        const mocked = functionMock()
-          .withNew(1).returns(retValueOne)
-          .withNew(1, 2).returns(retValueTwo);
+      //returns 'foo'
+      mocked(2, 1);
 
-        //returns {}
-        new mocked(2, 1);
+- with the `new` operator, when the `.withOtherNew()` method hasn't been called:
+
+  the mock function returns `undefined` if it's called with arguments which
+  haven't matched arguments from any previous `.withNew()` call:
+
+      const retValueOne = [];
+      const retValueTwo = {};
+      const mocked = functionMock()
+        .withNew(1).returns(retValueOne)
+        .withNew(1, 2).returns(retValueTwo);
+
+      //returns {} (an instance of mocked)
+      new mocked(2, 1);
+
+- with the `new` operator, when the `.withOtherNew()` method has been called:
+
+  the mock function returns/throws a value provided to the subsequent
+  `.returns()` / `.throws()` call:
+
+      const retValueOne = [];
+      const retValueTwo = {};
+      const retValueDefault = {};
+      const mocked = functionMock()
+        .withNew(1).returns(retValueOne)
+        .withNew(1, 2).returns(retValueTwo)
+        .withOtherNew().returns(retValueDefault);
+
+      //returns retValueDefault
+      new mocked(2, 1);
 
 #### Arguments match rules
 For all methods (`.with()` & `.withNew()`) the arguments matching rules are the
