@@ -459,8 +459,8 @@ tp(`with/withNew arguments are not confused`, t => {
 //call behavior with unmatched arguments
 //==============================================================================
 
-tp(`returns undefined/{} if no .with()/.withNew() arguments match`, t => {
-  let fm = functionMock()
+tp(`by default returns undef/{} if no .with()/.withNew() args match`, t => {
+  const fm = functionMock()
     .with(1).returns(2)
     .withNew(1).returns({foo: 'bar'});
 
@@ -469,6 +469,223 @@ tp(`returns undefined/{} if no .with()/.withNew() arguments match`, t => {
   const retValWithNew = new fm(2);
   t.ok(retValWithNew instanceof fm);
   t.equal(Object.getOwnPropertyNames(retValWithNew).length, 0);
+
+  t.end();
+});
+
+tp(`returns/throws a value if .withOther()/.withOtherNew called`, t => {
+  const returnValuePrimitive = Symbol('Return value');
+  let fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOther().returns(returnValuePrimitive);
+
+  t.equal(fm(2), returnValuePrimitive);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOther().throws(returnValuePrimitive);
+
+  t.throws(() => { fm(2); }, returnValuePrimitive);
+
+  const returnValueReference = {};
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOtherNew().returns(returnValueReference);
+
+  t.equal(new fm(2), returnValueReference);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOtherNew().throws(returnValuePrimitive);
+
+  t.throws(() => { new fm(2); }, returnValuePrimitive);
+
+  t.end();
+});
+
+tp(`withOther/withOtherNew may be used together`, t => {
+  const returnValuePrimitive = Symbol('Return value');
+  const returnValueReference = {};
+  let fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOther().returns(returnValuePrimitive)
+    .withOtherNew().returns(returnValueReference);
+
+  t.equal(fm(2), returnValuePrimitive);
+  t.equal(new fm(2), returnValueReference);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOther().throws(returnValuePrimitive)
+    .withOtherNew().returns(returnValueReference);
+
+  t.throws(() => { fm(2); }, returnValuePrimitive);
+  t.equal(new fm(2), returnValueReference);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOther().returns(returnValuePrimitive)
+    .withOtherNew().throws(returnValueReference);
+
+  t.equal(fm(2), returnValuePrimitive);
+  t.throws(() => { new fm(2); }, returnValueReference);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOther().throws(returnValuePrimitive)
+    .withOtherNew().throws(returnValueReference);
+
+  t.throws(() => { fm(2); }, returnValuePrimitive);
+  t.throws(() => { new fm(2); }, returnValueReference);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOtherNew().returns(returnValueReference)
+    .withOther().returns(returnValuePrimitive);
+
+  t.equal(new fm(2), returnValueReference);
+  t.equal(fm(2), returnValuePrimitive);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOtherNew().returns(returnValueReference)
+    .withOther().throws(returnValuePrimitive);
+
+  t.equal(new fm(2), returnValueReference);
+  t.throws(() => { fm(2); }, returnValuePrimitive);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOtherNew().throws(returnValueReference)
+    .withOther().returns(returnValuePrimitive);
+
+  t.throws(() => { new fm(2); }, returnValueReference);
+  t.equal(fm(2), returnValuePrimitive);
+
+  fm = functionMock()
+    .with(1).returns(2)
+    .withNew(1).returns({foo: 'bar'})
+    .withOtherNew().throws(returnValueReference)
+    .withOther().throws(returnValuePrimitive);
+
+  t.throws(() => { new fm(2); }, returnValueReference);
+  t.throws(() => { fm(2); }, returnValuePrimitive);
+
+  t.end();
+});
+
+//==============================================================================
+//methods inteded call order
+//==============================================================================
+
+tp(`checking availability of methods at various stages`, t => {
+  let fm = functionMock();
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+
+  //.with()
+  fm = functionMock();
+  fm = fm.with();
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOther, undefined);
+  t.equal(fm.withOtherNew, undefined);
+
+  fm = functionMock();
+  fm = fm.with();
+  fm = fm.returns(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+
+  fm = functionMock();
+  fm = fm.with();
+  fm = fm.throws(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+
+  //.withNew()
+  fm = functionMock();
+  fm = fm.withNew();
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOther, undefined);
+  t.equal(fm.withOtherNew, undefined);
+
+  fm = functionMock();
+  fm = fm.withNew();
+  fm = fm.returns(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+
+  fm = functionMock();
+  fm = fm.withNew();
+  fm = fm.throws(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+
+  //.withOther()
+  fm = functionMock();
+  fm = fm.withOther();
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOther, undefined);
+  t.equal(fm.withOtherNew, undefined);
+
+
+  fm = functionMock();
+  fm = fm.withOther();
+  fm = fm.returns(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOther, undefined);
+
+  fm = functionMock();
+  fm = fm.withOther();
+  fm = fm.throws(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOther, undefined);
+
+  //.withOtherNew()
+  fm = functionMock();
+  fm = fm.withOtherNew();
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOther, undefined);
+  t.equal(fm.withOtherNew, undefined);
+
+  fm = functionMock();
+  fm = fm.withOtherNew();
+  fm = fm.returns(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOtherNew, undefined);
+
+  fm = functionMock();
+  fm = fm.withOtherNew();
+  fm = fm.throws(1);
+  t.equal(fm.throws, undefined);
+  t.equal(fm.returns, undefined);
+  t.equal(fm.with, undefined);
+  t.equal(fm.withNew, undefined);
+  t.equal(fm.withOtherNew, undefined);
 
   t.end();
 });
