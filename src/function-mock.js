@@ -8,7 +8,12 @@ function functionMock() {
 
     function processResponse(response) {
       if (response.isThrow) {
-        throw response.value;
+        const errorMsg = [
+          `Mocked function called with arguments:`,
+          `${argsCalledWith.toString()},`,
+          `Error message is: ${String(response.value)}`,
+        ].join(' ');
+        throw new Error(errorMsg);
       } else {
         return response.value;
       }

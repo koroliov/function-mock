@@ -431,7 +431,10 @@ tp(`matches arguments only the first with/withNew call`, t => {
   fm = functionMock()
     .withNew(1).throws(refValueOne)
     .withNew(1).returns(refValueTwo);
-  t.throws(() => { new fm(1); }, refValueOne);
+  t.throws(() => { new fm(1); }, new RegExp([
+    'Mocked function called with arguments: 1,',
+    `Error message is: \\[object Object\\]`,
+  ].join(' ')));
 
   t.end();
 });
@@ -535,7 +538,10 @@ tp(`withOther/withOtherNew may be used together`, t => {
     .withOtherNew().throws(returnValueReference);
 
   t.equal(fm(2), returnValuePrimitive);
-  t.throws(() => { new fm(2); }, returnValueReference);
+  t.throws(() => { new fm(2); }, new RegExp([
+    'Mocked function called with arguments: 2,',
+    `Error message is: \\[object Object\\]`,
+  ].join(' ')));
 
   fm = functionMock()
     .with(1).returns(2)
@@ -543,8 +549,14 @@ tp(`withOther/withOtherNew may be used together`, t => {
     .withOther().throws(returnValuePrimitive)
     .withOtherNew().throws(returnValueReference);
 
-  t.throws(() => { fm(2); }, returnValuePrimitive);
-  t.throws(() => { new fm(2); }, returnValueReference);
+  t.throws(() => { fm(2); }, new RegExp([
+    'Mocked function called with arguments: 2,',
+    `Error message is: Symbol\\(`,
+  ].join(' ')));
+  t.throws(() => { new fm(2); }, new RegExp([
+    'Mocked function called with arguments: 2,',
+    `Error message is: \\[object Object\\]`,
+  ].join(' ')));
 
   fm = functionMock()
     .with(1).returns(2)
@@ -570,7 +582,10 @@ tp(`withOther/withOtherNew may be used together`, t => {
     .withOtherNew().throws(returnValueReference)
     .withOther().returns(returnValuePrimitive);
 
-  t.throws(() => { new fm(2); }, returnValueReference);
+  t.throws(() => { new fm(2); }, new RegExp([
+    'Mocked function called with arguments: 2,',
+    `Error message is: \\[object Object\\]`,
+  ].join(' ')));
   t.equal(fm(2), returnValuePrimitive);
 
   fm = functionMock()
@@ -579,8 +594,14 @@ tp(`withOther/withOtherNew may be used together`, t => {
     .withOtherNew().throws(returnValueReference)
     .withOther().throws(returnValuePrimitive);
 
-  t.throws(() => { new fm(2); }, returnValueReference);
-  t.throws(() => { fm(2); }, returnValuePrimitive);
+  t.throws(() => { new fm(2); }, new RegExp([
+    'Mocked function called with arguments: 2,',
+    `Error message is: \\[object Object\\]`,
+  ].join(' ')));
+  t.throws(() => { fm(2); }, new RegExp([
+    'Mocked function called with arguments: 2,',
+    `Error message is: Symbol\\(`,
+  ].join(' ')));
 
   t.end();
 });
@@ -687,5 +708,23 @@ tp(`checking availability of methods at various stages`, t => {
   t.equal(fm.withNew, undefined);
   t.equal(fm.withOtherNew, undefined);
 
+  t.end();
+});
+
+//==============================================================================
+//throws behavior
+//==============================================================================
+
+tp(`throws behavior`, t => {
+  const errorMsgAppendedValue = ['foo', 'bar'];
+  const fm = functionMock()
+    .with(1).throws(errorMsgAppendedValue);
+  t.throws(() => {
+      fm(1);
+    },
+    //Reports the arguments which which the mocked function was called and also
+    //outputs the value passed to the .throws() call (the user should prefer
+    //strings)
+    /Mocked function called with arguments: 1, Error message is: foo,bar/);
   t.end();
 });
