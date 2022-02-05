@@ -13,7 +13,7 @@ when it's called with particular arguments.
     const fm = functionMock()
       .with('foo').returns('1')
       .with('bar').returns('2')
-      .withOther().throws(new Error('Unexpected arguments received'));
+      .withOther().throws('Some error message');
     //returns '1'
     fm('foo');
     //returns '2'
@@ -21,7 +21,7 @@ when it's called with particular arguments.
     //throws
     fm('bar', true);
 
-### Documentation v1.1.*
+### Documentation v2.0.\*
 
 The imported module is a function, which when called returns a mock function.
 On itself it's not much useful.
@@ -59,7 +59,7 @@ This function has several methods:
 
       mocked = functionMock()
         .with(1).returns(2)
-        .withOther().throws(0);
+        .withOther().throws('Some error message');
       //throws 0
       mocked();
       //etc.
@@ -77,9 +77,10 @@ This function has several methods:
           .returns(1);
 
 - `.withOtherNew()`
-  The same as the `.withOther()` method, except that will return/throw a value
-  provided to the subsequent `.returns()` or `.throws()` call only if the mock
-  function has been called with the `new` operator.
+  The same as the `.withOther()` method, except that will return/throw a
+  value/error with a message provided to the subsequent `.returns()` or
+  `.throws()` call only if the mock function has been called with the `new`
+  operator.
 
 - `.returns(value)` This method is intended to be called after a `.with()` or
   similar method call: `.with(…).returns(…)`. Makes the mocked function return
@@ -96,8 +97,7 @@ This function has several methods:
       //returns notPrimitive
       new mocked(1);
 
-- `.throws(value)` analogous to `.returns()` but throws the value. May be any
-value, not only a reference one, but generally should be an instance of `Error`
+- `.throws(message)` analogous to `.returns()` but throws `new Error(message)`.
 
 #### Call behavior with unmatched arguments
 
@@ -115,8 +115,9 @@ value, not only a reference one, but generally should be an instance of `Error`
 
 - without the `new` operator, when the `.withOther()` method has been called:
 
-  the mock function returns/throws a value provided to the subsequent
-  `.returns()` / `.throws()` call:
+  the mock function returns a value provided to a subsequent
+  `.returns()` call, or throws an error with a message, provided to a
+  subsequent `.throws()` call
 
       const mocked = functionMock()
         .with(1).returns(2)
@@ -142,8 +143,8 @@ value, not only a reference one, but generally should be an instance of `Error`
 
 - with the `new` operator, when the `.withOtherNew()` method has been called:
 
-  the mock function returns/throws a value provided to the subsequent
-  `.returns()` / `.throws()` call:
+  the mock function returns/throws a value/error with a message provided to the
+  subsequent `.returns()` / `.throws()` call:
 
       const retValueOne = [];
       const retValueTwo = {};
